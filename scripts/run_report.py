@@ -138,14 +138,18 @@ def gap_fill(
     _print_gap_fill(result)  # type: ignore[arg-type]
 
 
-def _print_orb(result: dict[str, object]) -> None:
-    """Pretty-print an ORB ReportResult with rich."""
+def _print_orb(result: dict[str, object], report_name: str = "ORB") -> None:
+    """Pretty-print an ORB-shaped ReportResult with rich.
+
+    Used for both ORB and IB, which share an identical output schema —
+    the only difference is the header label and the OR window length.
+    """
     summary = result["summary"]
     buckets = result["buckets"]
     assert isinstance(summary, dict)
     assert isinstance(buckets, pl.DataFrame)
 
-    console.print(f"\n[bold]ORB Report — {summary.get('symbol', '?')}[/bold]")
+    console.print(f"\n[bold]{report_name} Report — {summary.get('symbol', '?')}[/bold]")
     dr = summary.get("date_range", ("?", "?"))
     assert isinstance(dr, tuple)
     console.print(
@@ -163,7 +167,7 @@ def _print_orb(result: dict[str, object]) -> None:
         console.print("[yellow]No breakout data for the requested parameters.[/yellow]")
         return
 
-    table = Table(title="ORB Breakout Statistics", show_lines=True)
+    table = Table(title=f"{report_name} Breakout Statistics", show_lines=True)
     table.add_column("Direction", style="cyan")
     table.add_column("N", justify="right")
     table.add_column("BO rate", justify="right")
@@ -231,6 +235,27 @@ def orb(
     )
     result = compute(bars, params)
     _print_orb(result)  # type: ignore[arg-type]
+
+
+@app.command("ib")
+def ib(
+    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
+    lookback: int = typer.Option(180, help="Lookback in trading days"),
+    recency: int = typer.Option(30, help="Recency window in trading days"),
+) -> None:
+    """Run the Initial Balance Breakout report (60-minute window)."""
+    from reports.ib import compute
+
+    console.print(f"Loading bars for [bold]{symbol}[/bold]...")
+    bars = _load_bars(symbol)
+    if bars.height == 0:
+        console.print(f"[red]No bars found for {symbol}.[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"  {bars.height:,} bars loaded.")
+    params = ReportParams(symbol=symbol, lookback_days=lookback, recency_window_days=recency)
+    result = compute(bars, params)
+    _print_orb(result, report_name="IB")  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
