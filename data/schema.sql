@@ -29,6 +29,15 @@ CREATE TABLE IF NOT EXISTS bars_daily (
     PRIMARY KEY (symbol, trade_date)
 );
 
+-- Tracks which (symbol, month) combos have been backfilled, for idempotency
+CREATE TABLE IF NOT EXISTS backfill_log (
+    symbol        VARCHAR   NOT NULL,
+    year_month    VARCHAR   NOT NULL,  -- 'YYYY-MM'
+    completed_at  TIMESTAMP NOT NULL,
+    row_count     INTEGER   NOT NULL,
+    PRIMARY KEY (symbol, year_month)
+);
+
 CREATE TABLE IF NOT EXISTS nse_holidays (
     holiday_date DATE       NOT NULL PRIMARY KEY,
     name         VARCHAR    NOT NULL
