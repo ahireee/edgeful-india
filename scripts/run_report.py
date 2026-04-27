@@ -152,10 +152,14 @@ def _print_orb(result: dict[str, object], report_name: str = "ORB") -> None:
     console.print(f"\n[bold]{report_name} Report — {summary.get('symbol', '?')}[/bold]")
     dr = summary.get("date_range", ("?", "?"))
     assert isinstance(dr, tuple)
-    console.print(
-        f"  OR window: {summary.get('or_minutes')} min  |  "
-        f"Lookback: {summary.get('lookback_days')} days ({dr[0]} -> {dr[1]})"
-    )
+    or_min = summary.get("or_minutes")
+    if or_min is not None:
+        console.print(
+            f"  OR window: {or_min} min  |  "
+            f"Lookback: {summary.get('lookback_days')} days ({dr[0]} -> {dr[1]})"
+        )
+    else:
+        console.print(f"  Lookback: {summary.get('lookback_days')} days ({dr[0]} -> {dr[1]})")
     console.print(
         f"  Total days: {summary.get('total_days')}  |  "
         f"Breakout days: {summary.get('breakout_days')}  |  "
@@ -256,6 +260,27 @@ def ib(
     params = ReportParams(symbol=symbol, lookback_days=lookback, recency_window_days=recency)
     result = compute(bars, params)
     _print_orb(result, report_name="IB")  # type: ignore[arg-type]
+
+
+@app.command("pdh-pdl")
+def pdh_pdl(
+    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
+    lookback: int = typer.Option(180, help="Lookback in trading days"),
+    recency: int = typer.Option(30, help="Recency window in trading days"),
+) -> None:
+    """Run the Previous Day High/Low breakout report."""
+    from reports.pdh_pdl import compute
+
+    console.print(f"Loading bars for [bold]{symbol}[/bold]...")
+    bars = _load_bars(symbol)
+    if bars.height == 0:
+        console.print(f"[red]No bars found for {symbol}.[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"  {bars.height:,} bars loaded.")
+    params = ReportParams(symbol=symbol, lookback_days=lookback, recency_window_days=recency)
+    result = compute(bars, params)
+    _print_orb(result, report_name="PDH/PDL")  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
