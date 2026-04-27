@@ -367,6 +367,124 @@ class TestGapFillEdgeCases:
         assert r["summary"]["total_gap_days"] == 0
 
 
+class TestInstantFill:
+    """Regression: a gap that fills inside the 09:15 bar must record 0 minutes,
+    not null, and must be included in avg/median calculations."""
+
+    def _two_day_bars(
+        self,
+        prev_close: float,
+        today_open: float,
+        first_bar_low: float,
+        first_bar_high: float,
+    ) -> pl.DataFrame:
+        """Build two consecutive trading days where day-2's first bar carries
+        the requested low/high so we can force an instant fill."""
+        rows: list[dict[str, object]] = []
+        # Day 1: closes at prev_close
+        d1 = datetime(2025, 1, 6, 9, 15)
+        for i in range(375):
+            rows.append(
+                {
+                    "symbol": "T",
+                    "ts_ist": d1 + timedelta(minutes=i),
+                    "open": prev_close,
+                    "high": prev_close,
+                    "low": prev_close,
+                    "close": prev_close,
+                    "volume": 1,
+                }
+            )
+        # Day 2
+        d2 = datetime(2025, 1, 7, 9, 15)
+        for i in range(375):
+            if i == 0:
+                rows.append(
+                    {
+                        "symbol": "T",
+                        "ts_ist": d2,
+                        "open": today_open,
+                        "high": first_bar_high,
+                        "low": first_bar_low,
+                        "close": today_open,
+                        "volume": 1,
+                    }
+                )
+            else:
+                rows.append(
+                    {
+                        "symbol": "T",
+                        "ts_ist": d2 + timedelta(minutes=i),
+                        "open": today_open,
+                        "high": today_open,
+                        "low": today_open,
+                        "close": today_open,
+                        "volume": 1,
+                    }
+                )
+        return pl.DataFrame(rows)
+
+    def test_up_gap_filled_in_first_bar_records_zero_minutes(self) -> None:
+        # Up-gap: prev_close 100, today_open 100.3 (0.3%). First bar low = 100
+        # → fills inside the 09:15 bar.
+        df = self._two_day_bars(
+            prev_close=100.0,
+            today_open=100.3,
+            first_bar_low=100.0,
+            first_bar_high=100.3,
+        )
+        params = ReportParams(symbol="T", lookback_days=500, recency_window_days=30)
+        r = compute(df, params)
+        buckets = r["buckets"]
+        assert isinstance(buckets, pl.DataFrame)
+
+        rows = {(row["bucket"], row["direction"]): row for row in buckets.iter_rows(named=True)}
+        key = ("0.25-0.5%", "up")
+        assert key in rows, f"Expected bucket {key}, got {list(rows.keys())}"
+        bucket = rows[key]
+        assert bucket["instances"] == 1
+        assert bucket["fill_rate"] == 1.0
+        # The fill happened in bar 0 → 0 minutes, NOT null.
+        assert bucket["avg_minutes_to_fill"] == 0.0
+        assert bucket["median_minutes_to_fill"] == 0.0
+
+    def test_down_gap_filled_in_first_bar_records_zero_minutes(self) -> None:
+        # Down-gap: prev_close 100, today_open 99.7 (-0.3%). First bar high = 100
+        # → fills inside the 09:15 bar.
+        df = self._two_day_bars(
+            prev_close=100.0,
+            today_open=99.7,
+            first_bar_low=99.7,
+            first_bar_high=100.0,
+        )
+        params = ReportParams(symbol="T", lookback_days=500, recency_window_days=30)
+        r = compute(df, params)
+        buckets = r["buckets"]
+        assert isinstance(buckets, pl.DataFrame)
+
+        rows = {(row["bucket"], row["direction"]): row for row in buckets.iter_rows(named=True)}
+        key = ("0.25-0.5%", "down")
+        assert key in rows, f"Expected bucket {key}, got {list(rows.keys())}"
+        bucket = rows[key]
+        assert bucket["instances"] == 1
+        assert bucket["fill_rate"] == 1.0
+        assert bucket["avg_minutes_to_fill"] == 0.0
+        assert bucket["median_minutes_to_fill"] == 0.0
+
+
+class TestMinutesFormatter:
+    """Ensure the CLI formatter distinguishes 0-minute fills from no-fill buckets."""
+
+    def test_zero_displays_as_lt1_not_emdash(self) -> None:
+        from scripts.run_report import _fmt_minutes
+
+        assert _fmt_minutes(None) == "—"
+        assert _fmt_minutes(0.0) == "<1"
+        assert _fmt_minutes(0.4) == "<1"
+        assert _fmt_minutes(1.0) == "1"
+        assert _fmt_minutes(42.7) == "43"
+
+
 class TestWilsonCI:
     def test_zero_trials(self) -> None:
         assert wilson_ci(0, 0) == (0.0, 0.0)

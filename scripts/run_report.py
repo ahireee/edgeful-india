@@ -42,6 +42,20 @@ def _load_bars(symbol: str) -> pl.DataFrame:
     )
 
 
+def _fmt_minutes(v: float | None) -> str:
+    """Format a minutes-to-fill value for display.
+
+    A genuine instant fill (gap closes inside the 09:15 bar) records 0.0 and
+    must render as "<1" — distinct from "—", which means no gap in the bucket
+    ever filled and the avg/median is undefined.
+    """
+    if v is None:
+        return "—"
+    if v < 1:
+        return "<1"
+    return f"{v:.0f}"
+
+
 def _print_gap_fill(result: dict[str, object]) -> None:
     """Pretty-print a Gap Fill ReportResult with rich."""
     summary = result["summary"]
@@ -76,8 +90,8 @@ def _print_gap_fill(result: dict[str, object]) -> None:
     for row in buckets.iter_rows(named=True):
         fill_pct = f"{row['fill_rate']:.0%}"
         ci = f"{row['fill_rate_ci_low']:.0%}-{row['fill_rate_ci_high']:.0%}"
-        avg_m = f"{row['avg_minutes_to_fill']:.0f}" if row["avg_minutes_to_fill"] else "—"
-        med_m = f"{row['median_minutes_to_fill']:.0f}" if row["median_minutes_to_fill"] else "—"
+        avg_m = _fmt_minutes(row["avg_minutes_to_fill"])
+        med_m = _fmt_minutes(row["median_minutes_to_fill"])
         recent = (
             f"{row['recent_30d_fill_rate']:.0%}" if row["recent_30d_fill_rate"] is not None else "—"
         )
