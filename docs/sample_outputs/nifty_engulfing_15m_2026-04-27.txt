@@ -1,0 +1,16 @@
+Loading bars for NIFTY...
+  191,106 bars loaded.
+
+Engulfing Reversals — NIFTY
+  Timeframe: 15m  |  Lookahead: 3 candles  |  Lookback: 180 days (2025-07-30 -> 
+2026-04-24)
+  Total engulfings: 491  |  Reversals: 243  |  Overall reversal rate: 49.5%
+
+                Engulfing Reversal Statistics                 
+┏━━━━━━━━━┳━━━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Type    ┃   N ┃ Rev rate ┃  Rev CI ┃ Avg fwd% ┃ Recent 30d ┃
+┡━━━━━━━━━╇━━━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ bullish │ 210 │      51% │ 45%-58% │   +0.00% │        38% │
+├─────────┼─────┼──────────┼─────────┼──────────┼────────────┤
+│ bearish │ 281 │      48% │ 42%-54% │   -0.01% │      29% ⚠ │
+└─────────┴─────┴──────────┴─────────┴──────────┴────────────┘

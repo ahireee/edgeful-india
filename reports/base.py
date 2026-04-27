@@ -24,6 +24,8 @@ class ReportParams(BaseModel):
     lookback_days: int = 180
     recency_window_days: int = 30
     or_minutes: int = 15  # opening range window (ORB / IB)
+    timeframe: str = "15m"  # candle timeframe (Engulfing): "5m" | "15m" | "1h"
+    lookahead_candles: int = 3  # forward window (Engulfing) used to confirm a reversal
 
 
 # ---------------------------------------------------------------------------

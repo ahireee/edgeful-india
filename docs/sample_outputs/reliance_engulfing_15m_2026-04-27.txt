@@ -1,0 +1,16 @@
+Loading bars for RELIANCE...
+  191,095 bars loaded.
+
+Engulfing Reversals — RELIANCE
+  Timeframe: 15m  |  Lookahead: 3 candles  |  Lookback: 180 days (2025-07-30 -> 
+2026-04-24)
+  Total engulfings: 646  |  Reversals: 319  |  Overall reversal rate: 49.4%
+
+                Engulfing Reversal Statistics                 
+┏━━━━━━━━━┳━━━━━┳━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Type    ┃   N ┃ Rev rate ┃  Rev CI ┃ Avg fwd% ┃ Recent 30d ┃
+┡━━━━━━━━━╇━━━━━╇━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ bullish │ 314 │      49% │ 43%-54% │   -0.01% │      27% ⚠ │
+├─────────┼─────┼──────────┼─────────┼──────────┼────────────┤
+│ bearish │ 332 │      50% │ 45%-55% │   +0.01% │        41% │
+└─────────┴─────┴──────────┴─────────┴──────────┴────────────┘

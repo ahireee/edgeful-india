@@ -346,6 +346,93 @@ def session_bias(
     _print_session_bias(result)  # type: ignore[arg-type]
 
 
+def _print_engulfing(result: dict[str, object]) -> None:
+    """Pretty-print an Engulfing ReportResult with rich."""
+    summary = result["summary"]
+    buckets = result["buckets"]
+    assert isinstance(summary, dict)
+    assert isinstance(buckets, pl.DataFrame)
+
+    console.print(f"\n[bold]Engulfing Reversals — {summary.get('symbol', '?')}[/bold]")
+    dr = summary.get("date_range", ("?", "?"))
+    assert isinstance(dr, tuple)
+    console.print(
+        f"  Timeframe: {summary.get('timeframe')}  |  "
+        f"Lookahead: {summary.get('lookahead_candles')} candles  |  "
+        f"Lookback: {summary.get('lookback_days')} days ({dr[0]} -> {dr[1]})"
+    )
+    console.print(
+        f"  Total engulfings: {summary.get('total_engulfings')}  |  "
+        f"Reversals: {summary.get('total_reversals')}  |  "
+        f"Overall reversal rate: {summary.get('overall_reversal_rate', 0):.1%}\n"
+    )
+
+    if buckets.height == 0:
+        console.print("[yellow]No engulfing patterns for the requested parameters.[/yellow]")
+        return
+
+    table = Table(title="Engulfing Reversal Statistics", show_lines=True)
+    table.add_column("Type", style="cyan")
+    table.add_column("N", justify="right")
+    table.add_column("Rev rate", justify="right", style="green")
+    table.add_column("Rev CI", justify="right")
+    table.add_column("Avg fwd%", justify="right")
+    table.add_column("Recent 30d", justify="right")
+
+    for row in buckets.iter_rows(named=True):
+        avg_fwd = f"{row['avg_forward_pct']:+.2f}%" if row["avg_forward_pct"] is not None else "—"
+        recent = (
+            f"{row['recent_30d_reversal_rate']:.0%}"
+            if row["recent_30d_reversal_rate"] is not None
+            else "—"
+        )
+        flag = ""
+        if row["recent_30d_reversal_rate"] is not None:
+            diff = abs(row["recent_30d_reversal_rate"] - row["reversal_rate"])
+            if diff > 0.15:
+                flag = " ⚠"
+
+        table.add_row(
+            row["engulf_type"],
+            str(row["instances"]),
+            f"{row['reversal_rate']:.0%}",
+            f"{row['reversal_rate_ci_low']:.0%}-{row['reversal_rate_ci_high']:.0%}",
+            avg_fwd,
+            recent + flag,
+        )
+
+    console.print(table)
+
+
+@app.command("engulfing")
+def engulfing(
+    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
+    lookback: int = typer.Option(180, help="Lookback in trading days"),
+    recency: int = typer.Option(30, help="Recency window in trading days"),
+    timeframe: str = typer.Option("15m", "--timeframe", help="Candle timeframe: 5m, 15m, or 1h"),
+    lookahead: int = typer.Option(3, "--lookahead", help="Forward candles to confirm a reversal"),
+) -> None:
+    """Run the Engulfing Candle Reversals report."""
+    from reports.engulfing import compute
+
+    console.print(f"Loading bars for [bold]{symbol}[/bold]...")
+    bars = _load_bars(symbol)
+    if bars.height == 0:
+        console.print(f"[red]No bars found for {symbol}.[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"  {bars.height:,} bars loaded.")
+    params = ReportParams(
+        symbol=symbol,
+        lookback_days=lookback,
+        recency_window_days=recency,
+        timeframe=timeframe,
+        lookahead_candles=lookahead,
+    )
+    result = compute(bars, params)
+    _print_engulfing(result)  # type: ignore[arg-type]
+
+
 @app.command("pdh-pdl")
 def pdh_pdl(
     symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
