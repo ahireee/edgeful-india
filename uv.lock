@@ -404,7 +404,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">=2.6" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "rich", specifier = ">=13.7" },
-    { name = "streamlit", specifier = ">=1.32" },
+    { name = "streamlit", specifier = ">=1.43" },
     { name = "tenacity", specifier = ">=9.0" },
     { name = "typer", specifier = ">=0.12" },
     { name = "upstox-python-sdk", specifier = ">=2.21" },
