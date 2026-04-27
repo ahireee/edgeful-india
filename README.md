@@ -1,5 +1,7 @@
 # edgeful-india
 
+[![CI](https://github.com/ahireee/edgeful-india/actions/workflows/ci.yml/badge.svg)](https://github.com/ahireee/edgeful-india/actions/workflows/ci.yml)
+
 Probability-based trading edge platform for Indian markets. Pre-computes the historical probabilities of recurring intraday setups (gap fills, opening range breakouts, etc.) on NIFTY/BANKNIFTY and the top 10 NIFTY stocks, using real Upstox API data on rolling 6-month to 2-year windows.
 
 Inspired by [edgeful.com](https://www.edgeful.com) for US futures. There's no equivalent for Indian markets — this is the gap.

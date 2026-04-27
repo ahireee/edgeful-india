@@ -55,6 +55,9 @@ ignore_missing_imports = true
 testpaths = ["tests"]
 addopts = "-v --strict-markers --cov=. --cov-report=term-missing"
 
+[tool.hatch.build.targets.wheel]
+packages = ["data", "reports", "backtest", "api", "dashboard", "scripts"]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

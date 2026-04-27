@@ -17,23 +17,24 @@ Why we track the index, not the future:
   contract at runtime via the Expired Instruments API.
 - This avoids the messy contract-rollover logic in Phase 1.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class Segment(str, Enum):
-    NSE_EQ = "NSE_EQ"        # NSE cash equity
+class Segment(StrEnum):
+    NSE_EQ = "NSE_EQ"  # NSE cash equity
     NSE_INDEX = "NSE_INDEX"  # NSE index (NIFTY, BANKNIFTY)
-    NFO_FUT = "NFO_FUT"      # NSE F&O futures (resolved at runtime)
+    NFO_FUT = "NFO_FUT"  # NSE F&O futures (resolved at runtime)
 
 
 @dataclass(frozen=True)
 class Instrument:
-    symbol: str           # human-readable, e.g. "NIFTY", "RELIANCE"
+    symbol: str  # human-readable, e.g. "NIFTY", "RELIANCE"
     segment: Segment
-    instrument_key: str   # Upstox format: "SEGMENT|ISIN" or "NSE_INDEX|Name"
+    instrument_key: str  # Upstox format: "SEGMENT|ISIN" or "NSE_INDEX|Name"
     description: str
 
     @property
@@ -45,18 +46,18 @@ class Instrument:
 # If a stock is replaced in NIFTY 50, update this list and rerun backfill for
 # the new ticker.
 UNIVERSE: list[Instrument] = [
-    Instrument("NIFTY",       Segment.NSE_INDEX, "NSE_INDEX|Nifty 50",       "NIFTY 50 index"),
-    Instrument("BANKNIFTY",   Segment.NSE_INDEX, "NSE_INDEX|Nifty Bank",     "Bank NIFTY index"),
-    Instrument("RELIANCE",    Segment.NSE_EQ,    "NSE_EQ|INE002A01018",      "Reliance Industries"),
-    Instrument("HDFCBANK",    Segment.NSE_EQ,    "NSE_EQ|INE040A01034",      "HDFC Bank"),
-    Instrument("ICICIBANK",   Segment.NSE_EQ,    "NSE_EQ|INE090A01021",      "ICICI Bank"),
-    Instrument("INFY",        Segment.NSE_EQ,    "NSE_EQ|INE009A01021",      "Infosys"),
-    Instrument("TCS",         Segment.NSE_EQ,    "NSE_EQ|INE467B01029",      "Tata Consultancy Services"),
-    Instrument("BHARTIARTL",  Segment.NSE_EQ,    "NSE_EQ|INE397D01024",      "Bharti Airtel"),
-    Instrument("ITC",         Segment.NSE_EQ,    "NSE_EQ|INE154A01025",      "ITC Ltd"),
-    Instrument("LT",          Segment.NSE_EQ,    "NSE_EQ|INE018A01030",      "Larsen & Toubro"),
-    Instrument("AXISBANK",    Segment.NSE_EQ,    "NSE_EQ|INE238A01034",      "Axis Bank"),
-    Instrument("KOTAKBANK",   Segment.NSE_EQ,    "NSE_EQ|INE237A01028",      "Kotak Mahindra Bank"),
+    Instrument("NIFTY", Segment.NSE_INDEX, "NSE_INDEX|Nifty 50", "NIFTY 50 index"),
+    Instrument("BANKNIFTY", Segment.NSE_INDEX, "NSE_INDEX|Nifty Bank", "Bank NIFTY index"),
+    Instrument("RELIANCE", Segment.NSE_EQ, "NSE_EQ|INE002A01018", "Reliance Industries"),
+    Instrument("HDFCBANK", Segment.NSE_EQ, "NSE_EQ|INE040A01034", "HDFC Bank"),
+    Instrument("ICICIBANK", Segment.NSE_EQ, "NSE_EQ|INE090A01021", "ICICI Bank"),
+    Instrument("INFY", Segment.NSE_EQ, "NSE_EQ|INE009A01021", "Infosys"),
+    Instrument("TCS", Segment.NSE_EQ, "NSE_EQ|INE467B01029", "Tata Consultancy Services"),
+    Instrument("BHARTIARTL", Segment.NSE_EQ, "NSE_EQ|INE397D01024", "Bharti Airtel"),
+    Instrument("ITC", Segment.NSE_EQ, "NSE_EQ|INE154A01025", "ITC Ltd"),
+    Instrument("LT", Segment.NSE_EQ, "NSE_EQ|INE018A01030", "Larsen & Toubro"),
+    Instrument("AXISBANK", Segment.NSE_EQ, "NSE_EQ|INE238A01034", "Axis Bank"),
+    Instrument("KOTAKBANK", Segment.NSE_EQ, "NSE_EQ|INE237A01028", "Kotak Mahindra Bank"),
 ]
 
 
