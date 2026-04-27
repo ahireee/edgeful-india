@@ -57,7 +57,7 @@ UNIVERSE: list[Instrument] = [
     Instrument("ITC", Segment.NSE_EQ, "NSE_EQ|INE154A01025", "ITC Ltd"),
     Instrument("LT", Segment.NSE_EQ, "NSE_EQ|INE018A01030", "Larsen & Toubro"),
     Instrument("AXISBANK", Segment.NSE_EQ, "NSE_EQ|INE238A01034", "Axis Bank"),
-    Instrument("KOTAKBANK", Segment.NSE_EQ, "NSE_EQ|INE237A01028", "Kotak Mahindra Bank"),
+    Instrument("KOTAKBANK", Segment.NSE_EQ, "NSE_EQ|INE237A01036", "Kotak Mahindra Bank"),
 ]
 
 

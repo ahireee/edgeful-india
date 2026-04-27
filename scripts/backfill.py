@@ -16,6 +16,7 @@ import duckdb
 import typer
 from rich.console import Console
 from rich.progress import BarColumn, MofNCompleteColumn, Progress, SpinnerColumn, TextColumn
+from upstox_client.rest import ApiException
 
 from data.db import get_conn
 from data.universe import UNIVERSE, Instrument
@@ -207,7 +208,16 @@ def _backfill(
                     progress.advance(task)
                     continue
 
-                candles = _fetch_candles(inst.instrument_key, from_date, to_date)
+                try:
+                    candles = _fetch_candles(inst.instrument_key, from_date, to_date)
+                except ApiException as exc:
+                    console.print(
+                        f"[bold red]API error {exc.status} for {inst.symbol} "
+                        f"{year_month}: {exc.reason}[/bold red]"
+                    )
+                    progress.advance(task)
+                    continue
+
                 new_rows = _insert_candles(conn, inst.symbol, candles)
                 _log_backfill(conn, inst.symbol, year_month, new_rows)
 
