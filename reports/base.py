@@ -23,6 +23,7 @@ class ReportParams(BaseModel):
     symbol: str
     lookback_days: int = 180
     recency_window_days: int = 30
+    or_minutes: int = 15  # opening range window (ORB / IB)
 
 
 # ---------------------------------------------------------------------------
