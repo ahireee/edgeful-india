@@ -15,4 +15,9 @@ repos:
           - duckdb>=1.0
           - pydantic>=2.6
           - types-requests
+          - python-dotenv>=1.0
+          - tenacity>=9.0
+          - rich>=13.7
+          - pytest>=8.0
+          - upstox-python-sdk>=2.21
         args: [--strict]
