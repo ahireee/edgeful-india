@@ -262,6 +262,90 @@ def ib(
     _print_orb(result, report_name="IB")  # type: ignore[arg-type]
 
 
+def _print_session_bias(result: dict[str, object]) -> None:
+    """Pretty-print a Session Bias ReportResult with rich."""
+    summary = result["summary"]
+    buckets = result["buckets"]
+    assert isinstance(summary, dict)
+    assert isinstance(buckets, pl.DataFrame)
+
+    console.print(f"\n[bold]Session Bias Report — {summary.get('symbol', '?')}[/bold]")
+    dr = summary.get("date_range", ("?", "?"))
+    assert isinstance(dr, tuple)
+    console.print(f"  Lookback: {summary.get('lookback_days')} days ({dr[0]} -> {dr[1]})")
+    console.print(
+        f"  Gap-days: {summary.get('total_gap_days')}  |  "
+        f"Green: {summary.get('green_count')}  |  "
+        f"Red: {summary.get('red_count')}  |  "
+        f"Overall green rate: {summary.get('overall_green_rate', 0):.1%}\n"
+    )
+
+    if buckets.height == 0:
+        console.print("[yellow]No gap data for the requested parameters.[/yellow]")
+        return
+
+    table = Table(title="Session Bias by Gap Bucket", show_lines=True)
+    table.add_column("Bucket", style="cyan")
+    table.add_column("Dir", style="bold")
+    table.add_column("N", justify="right")
+    table.add_column("Green%", justify="right", style="green")
+    table.add_column("Green CI", justify="right")
+    table.add_column("Red%", justify="right", style="red")
+    table.add_column("Avg chg%", justify="right")
+    table.add_column("Recent 30d", justify="right")
+
+    for row in buckets.iter_rows(named=True):
+        avg_chg = (
+            f"{row['avg_session_change_pct']:+.2f}%"
+            if row["avg_session_change_pct"] is not None
+            else "—"
+        )
+        recent = (
+            f"{row['recent_30d_green_rate']:.0%}"
+            if row["recent_30d_green_rate"] is not None
+            else "—"
+        )
+        flag = ""
+        if row["recent_30d_green_rate"] is not None:
+            diff = abs(row["recent_30d_green_rate"] - row["green_rate"])
+            if diff > 0.15:
+                flag = " ⚠"
+
+        table.add_row(
+            row["bucket"],
+            row["direction"],
+            str(row["instances"]),
+            f"{row['green_rate']:.0%}",
+            f"{row['green_rate_ci_low']:.0%}-{row['green_rate_ci_high']:.0%}",
+            f"{row['red_rate']:.0%}",
+            avg_chg,
+            recent + flag,
+        )
+
+    console.print(table)
+
+
+@app.command("session-bias")
+def session_bias(
+    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
+    lookback: int = typer.Option(180, help="Lookback in trading days"),
+    recency: int = typer.Option(30, help="Recency window in trading days"),
+) -> None:
+    """Run the Session Bias report (close-vs-open given the overnight gap)."""
+    from reports.session_bias import compute
+
+    console.print(f"Loading bars for [bold]{symbol}[/bold]...")
+    bars = _load_bars(symbol)
+    if bars.height == 0:
+        console.print(f"[red]No bars found for {symbol}.[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"  {bars.height:,} bars loaded.")
+    params = ReportParams(symbol=symbol, lookback_days=lookback, recency_window_days=recency)
+    result = compute(bars, params)
+    _print_session_bias(result)  # type: ignore[arg-type]
+
+
 @app.command("pdh-pdl")
 def pdh_pdl(
     symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
