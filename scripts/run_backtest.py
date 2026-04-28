@@ -14,6 +14,7 @@ metrics diverge meaningfully from train -- a coarse overfitting signal.
 from __future__ import annotations
 
 from datetime import date, timedelta
+from typing import Annotated
 
 import polars as pl
 import typer
@@ -172,8 +173,8 @@ def _run(strategy_name: str, symbol: str, lookback_months: int) -> None:
 
 @app.command("pdh-breakout")
 def pdh_breakout(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(24, help="Lookback in months"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in months")] = 24,
 ) -> None:
     """Run the PDH breakout strategy."""
     _run("pdh_breakout", symbol, lookback)
@@ -181,8 +182,8 @@ def pdh_breakout(
 
 @app.command("gap-fill-fade")
 def gap_fill_fade(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(24, help="Lookback in months"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in months")] = 24,
 ) -> None:
     """Run the gap-fill fade strategy."""
     _run("gap_fill_fade", symbol, lookback)
@@ -190,8 +191,8 @@ def gap_fill_fade(
 
 @app.command("orb-continuation")
 def orb_continuation(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(24, help="Lookback in months"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in months")] = 24,
 ) -> None:
     """Run the ORB continuation strategy."""
     _run("orb_continuation", symbol, lookback)

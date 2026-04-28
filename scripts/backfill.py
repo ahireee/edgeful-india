@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import time
 from datetime import date, datetime, timedelta
+from typing import Annotated
 
 import duckdb
 import typer
@@ -241,9 +242,11 @@ def _backfill(
 
 @app.command()
 def main(
-    months: int = typer.Option(24, help="Number of months to backfill"),
-    dry_run: bool = typer.Option(False, "--dry-run", help="Fetch 1 month of NIFTY only"),
-    db_path: str = typer.Option("", help="Override DUCKDB_PATH (empty = use env/default)"),
+    months: Annotated[int, typer.Option(help="Number of months to backfill")] = 24,
+    dry_run: Annotated[bool, typer.Option("--dry-run", help="Fetch 1 month of NIFTY only")] = False,
+    db_path: Annotated[
+        str, typer.Option(help="Override DUCKDB_PATH (empty = use env/default)")
+    ] = "",
 ) -> None:
     """Backfill historical 1-min bars from Upstox into DuckDB."""
     logging.basicConfig(level=logging.INFO)

@@ -6,6 +6,8 @@ Usage:
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import polars as pl
 import typer
 from rich.console import Console
@@ -119,9 +121,9 @@ def _print_gap_fill(result: dict[str, object]) -> None:
 
 @app.command("gap-fill")
 def gap_fill(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
 ) -> None:
     """Run the Gap Fill report."""
     from reports.gap_fill import compute
@@ -216,10 +218,12 @@ def _print_orb(result: dict[str, object], report_name: str = "ORB") -> None:
 
 @app.command("orb")
 def orb(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
-    or_minutes: int = typer.Option(15, "--or-minutes", help="Opening range window in minutes"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
+    or_minutes: Annotated[
+        int, typer.Option("--or-minutes", help="Opening range window in minutes")
+    ] = 15,
 ) -> None:
     """Run the Opening Range Breakout report."""
     from reports.orb import compute
@@ -243,9 +247,9 @@ def orb(
 
 @app.command("ib")
 def ib(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
 ) -> None:
     """Run the Initial Balance Breakout report (60-minute window)."""
     from reports.ib import compute
@@ -327,9 +331,9 @@ def _print_session_bias(result: dict[str, object]) -> None:
 
 @app.command("session-bias")
 def session_bias(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
 ) -> None:
     """Run the Session Bias report (close-vs-open given the overnight gap)."""
     from reports.session_bias import compute
@@ -406,11 +410,15 @@ def _print_engulfing(result: dict[str, object]) -> None:
 
 @app.command("engulfing")
 def engulfing(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
-    timeframe: str = typer.Option("15m", "--timeframe", help="Candle timeframe: 5m, 15m, or 1h"),
-    lookahead: int = typer.Option(3, "--lookahead", help="Forward candles to confirm a reversal"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
+    timeframe: Annotated[
+        str, typer.Option("--timeframe", help="Candle timeframe: 5m, 15m, or 1h")
+    ] = "15m",
+    lookahead: Annotated[
+        int, typer.Option("--lookahead", help="Forward candles to confirm a reversal")
+    ] = 3,
 ) -> None:
     """Run the Engulfing Candle Reversals report."""
     from reports.engulfing import compute
@@ -435,9 +443,9 @@ def engulfing(
 
 @app.command("pdh-pdl")
 def pdh_pdl(
-    symbol: str = typer.Option("NIFTY", help="Ticker symbol"),
-    lookback: int = typer.Option(180, help="Lookback in trading days"),
-    recency: int = typer.Option(30, help="Recency window in trading days"),
+    symbol: Annotated[str, typer.Option(help="Ticker symbol")] = "NIFTY",
+    lookback: Annotated[int, typer.Option(help="Lookback in trading days")] = 180,
+    recency: Annotated[int, typer.Option(help="Recency window in trading days")] = 30,
 ) -> None:
     """Run the Previous Day High/Low breakout report."""
     from reports.pdh_pdl import compute
